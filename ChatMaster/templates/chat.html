@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-container">
+    <header class="chat-header">
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="general">General Mode</button>
+            <button class="mode-btn" data-mode="expert">Expert Mode</button>
+        </div>
+        <div class="actions">
+            <button id="theme-toggle" class="btn btn-icon">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="menu-btn" class="btn btn-icon">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="chat-main">
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Welcome! I'm your AI assistant. Choose a mode to get started.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="quick-replies" id="quick-replies">
+        <button class="quick-reply-btn">Help</button>
+        <button class="quick-reply-btn">Features</button>
+        <button class="quick-reply-btn">Settings</button>
+    </div>
+
+    <footer class="chat-footer">
+        <div class="input-group">
+            <input type="text" id="message-input" class="form-control" placeholder="Type your message...">
+            <button id="send-btn" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </footer>
+</div>
+
+<div class="menu-overlay" id="menu-overlay">
+    <div class="menu-content">
+        <h3>Settings</h3>
+        <ul>
+            <li><a href="#" id="clear-chat">Clear Chat</a></li>
+            <li><a href="#" id="reset-chat">Reset Conversation</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
