@@ -1,5 +1,5 @@
 // Service worker: gör appen och nedladdade kartbilder tillgängliga offline.
-const APP_CACHE = 'fiskegrans-app-v1';
+const APP_CACHE = 'fiskegrans-app-v2';
 const TILE_CACHE = 'fiskegrans-tiles-v1';
 const APP_FILES = [
   './',
@@ -10,6 +10,7 @@ const APP_FILES = [
   'js/geo.js',
   'js/alarm.js',
   'data/boundary.geojson',
+  'data/lst-omraden.geojson',
   'icons/icon.svg',
   'icons/icon-180.png',
   'icons/icon-512.png',

@@ -30,30 +30,32 @@ statens vatten i Nedre Boksjön (65,58488° N, 16,06088° Ö).
 - **Gränsverktyg ✏️**: rita gränsen på kartan, lägg en punkt där du står
   (📍 Punkt här), importera GeoJSON/KML/GPX och exportera till GeoJSON.
 
-## Lägga in fiskegränsen
+## Fiskegränsen
 
-Gränsen följer inte med ännu. Den måste tas från Länsstyrelsen Västerbottens
-karta över statens vatten (fjällfiske) som hör till ditt fiskekort.
+Standardgränsen är Länsstyrelsen Västerbottens område **82 – "Nedre Boksjön
+del av, Kirjesån mellan Boksjön–Atjeken"**. Området är upplåtet hela året och
+båtfiske är tillåtet. Data hämtas direkt ur Länsstyrelsens karttjänst
+"LstAC Område upplåtet för fiske":
+`ext-geodata-lokala-visning.lansstyrelsen.se/arcgis/rest/services/LSTAC/LstAC_Fiske_ext/FeatureServer/0`.
 
-1. Öppna Länsstyrelsens karta för området på en dator eller i telefonen.
-2. Gör något av följande:
-   - **Rita** i appen: ✏️ → *Rita / redigera gräns* och tryck ut hörnpunkterna
-     längs gränsen. Satellitbakgrunden (⚙️ → Kartbakgrund) gör det lättare att
-     följa stränderna.
-   - **Importera** en KML-, GeoJSON- eller GPX-fil, till exempel en gräns
-     som ritats i Google My Maps eller ett GPX-spår från båten längs gränsen.
-3. Exportera med *💾 Exportera som GeoJSON* och lägg filen som
-   `data/boundary.geojson` i repot. Då blir den standardgräns för alla
-   installationer.
+- `data/boundary.geojson` innehåller den aktiva standardgränsen (område 82).
+- `data/lst-omraden.geojson` innehåller alla 7 upplåtna områden kring sjön.
+  De visas streckade på kartan och kan väljas under ✏️ → *Länsstyrelsens
+  områden*. Väljer du ett område med förbudsperiod, till exempel
+  "Ej upplåtet 5/5–14/6", varnar appen när perioden gäller.
+- Uppdatera data genom att köra workflowen *Hämta fiskegräns från
+  Länsstyrelsen* (`.github/workflows/fetch-boundary.yml`). GeoJSON hamnar i
+  jobbloggen och som artefakt.
 
-Gränsen sparas i telefonen, så den finns kvar offline.
+Du kan fortfarande rita en egen gräns eller importera GeoJSON/KML/GPX
+under ✏️.
 
 ## Köra på iPhone
 
 Platstjänster kräver https, så appen behöver ligga på en webbserver:
 
 1. **GitHub Pages**: workflowen `.github/workflows/pages.yml` publicerar
-   mappen `fiskegrans/`. Aktivera under *Settings → Pages → Source: GitHub
+   mappen `fiskegrans/` vid push till `main` (eller manuellt). Aktivera under *Settings → Pages → Source: GitHub
    Actions*. Pages på privata repon kräver ett betalt GitHub-konto, annars
    måste repot vara publikt.
 2. Öppna adressen i **Safari** och tillåt platsåtkomst.
@@ -97,7 +99,9 @@ js/app.js             Karta, GPS, larmlogik, inställningar, ritverktyg
 js/geo.js             Innanför/utanför, avstånd till gräns, tiles, KML/GPX
 js/alarm.js           Syntetiserade larmljud (Web Audio)
 sw.js                 Service worker – offline för app och kartbilder
-data/boundary.geojson Standardgräns (tom tills den läggs in)
+data/boundary.geojson Standardgräns (Länsstyrelsens område 82)
+data/lst-omraden.geojson Alla upplåtna områden kring sjön
+tools/                Hämtning av gränsdata från Länsstyrelsen
 vendor/leaflet/       Leaflet 1.9.4 (BSD-2)
 test/geo.test.mjs     Enhetstester för geometrin
 ```

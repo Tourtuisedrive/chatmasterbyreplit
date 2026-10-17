@@ -95,8 +95,13 @@
   <section id="boundarySheet" class="sheet" hidden>
     <div class="sheet-head"><h2>Fiskegräns</h2><button data-close>✕</button></div>
     <p id="boundaryInfo" class="small"></p>
-    <p class="small">Ta gränsen från Länsstyrelsens karta över statens vatten (fjällfiske) för det fiskekort du har. Rita av den här eller importera en fil. Kontrollera alltid mot den officiella kartan – appen är ett hjälpmedel.</p>
-    <button id="btnDraw" class="primary">✏️ Rita / redigera gräns</button>
+    <h3>Länsstyrelsens områden</h3>
+    <p class="small">Upplåtna fiskeområden på statens vatten kring Nedre Boksjön, hämtade från Länsstyrelsen Västerbottens karttjänst. Välj de områden ditt fiskekort gäller för.</p>
+    <div id="lstList"></div>
+    <button id="btnUseLst" class="primary">✓ Använd valda områden</button>
+    <h3>Egen gräns</h3>
+    <p class="small">Kontrollera alltid mot den officiella kartan – appen är ett hjälpmedel.</p>
+    <button id="btnDraw">✏️ Rita / redigera gräns</button>
     <label class="filebtn">📂 Importera (GeoJSON, KML, GPX)<input type="file" id="fileImport" accept=".geojson,.json,.kml,.gpx,application/json,application/vnd.google-earth.kml+xml,application/gpx+xml"></label>
     <button id="btnExport">💾 Exportera som GeoJSON</button>
     <button id="btnDeleteBoundary" class="danger">🗑 Ta bort gräns</button>

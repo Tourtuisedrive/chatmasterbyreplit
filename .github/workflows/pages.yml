@@ -2,7 +2,7 @@ name: Publicera Fiskegräns på GitHub Pages
 
 on:
   push:
-    branches: [main, claude/fishing-boundary-alert-app-grz168]
+    branches: [main]
     paths: ['fiskegrans/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 

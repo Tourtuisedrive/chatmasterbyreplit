@@ -95,6 +95,10 @@ button.danger { background: #6b1f25; }
   background: rgba(0, 0, 0, .85); padding: 12px 18px; border-radius: 12px; max-width: 86vw; text-align: center;
 }
 
+#lstList label { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #1d3a4f; }
+#lstList .meta { font-size: 13px; color: var(--muted); }
+#seasonBanner { color: #ffd28a; }
+
 .vertex-icon { background: #fff; border: 3px solid var(--accent); border-radius: 50%; }
 .mid-icon { background: rgba(255, 255, 255, .7); border: 2px solid var(--accent); border-radius: 50%; }
 .leaflet-container { background: #c9dbe6; }

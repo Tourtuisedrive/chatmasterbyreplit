@@ -1,4 +1,4 @@
-import { toPolygons, locate, zoneFor, bbox, padBbox, tilesForBbox, kmlToGeoJSON, gpxToGeoJSON } from './geo.js';
+import { toPolygons, locate, zoneFor, bbox, padBbox, tilesForBbox, kmlToGeoJSON, gpxToGeoJSON, isClosedSeason } from './geo.js';
 import { SOUNDS, unlockAudio, audioState, play, vibrate } from './alarm.js';
 
 // Nedre Boksjön (koordinat från användaren).
@@ -115,11 +115,79 @@ function setBoundary(geojson, { persist = true } = {}) {
   if (lastFix) evaluate(lastFix);
 }
 
+function boundaryFeatures() {
+  if (!boundaryGeoJSON) return [];
+  return boundaryGeoJSON.type === 'FeatureCollection' ? boundaryGeoJSON.features : [boundaryGeoJSON];
+}
+
+/** Varningstext om något valt område har fiskeförbud idag. */
+function closedSeasonWarning(date = new Date()) {
+  for (const f of boundaryFeatures()) {
+    const p = f.properties || {};
+    if (isClosedSeason(p['Upplåtels'], date)) return `${p['Områdesna']}: ${p['Upplåtels'].trim()} – fiske ej tillåtet idag!`;
+  }
+  return '';
+}
+
 function updateBoundaryInfo() {
   const n = polygons.reduce((s, p) => s + p[0].length - 1, 0);
-  $('boundaryInfo').textContent = polygons.length
-    ? `Gräns inläst: ${polygons.length} område(n), ${n} hörnpunkter.`
-    : 'Ingen gräns inläst ännu. Rita in den eller importera en fil.';
+  const names = boundaryFeatures()
+    .map((f) => f.properties?.['Områdesna'] && `${f.properties['Områdesna']} (${f.properties['Upplåtels'].trim()}${f.properties['Båtfiske']?.trim() ? ', båtfiske' : ''})`)
+    .filter(Boolean);
+  const season = closedSeasonWarning();
+  $('boundaryInfo').innerHTML = '';
+  const p = document.createElement('div');
+  p.textContent = polygons.length
+    ? `Aktiv gräns: ${names.length ? names.join('; ') : `egen gräns, ${n} hörnpunkter`}.`
+    : 'Ingen gräns inläst ännu. Välj ett område nedan, rita eller importera.';
+  $('boundaryInfo').appendChild(p);
+  if (season) {
+    const w = document.createElement('div');
+    w.id = 'seasonBanner';
+    w.textContent = `⚠️ ${season}`;
+    $('boundaryInfo').appendChild(w);
+  }
+  renderLstList();
+}
+
+// ---------- Länsstyrelsens områden ----------
+let lstAreas = [];
+const lstLayer = L.geoJSON(null, {
+  style: { color: '#555', weight: 1.5, dashArray: '6 6', fill: false },
+  onEachFeature: (f, layer) => layer.bindTooltip(`${f.properties['Nr2014']} ${f.properties['Områdesna']}`, { sticky: true }),
+}).addTo(map);
+
+async function loadLstAreas() {
+  try {
+    const res = await fetch('data/lst-omraden.geojson');
+    if (!res.ok) return;
+    const gj = await res.json();
+    lstAreas = gj.features;
+    lstLayer.addData(gj);
+    lstLayer.bringToBack();
+    renderLstList();
+  } catch (_) { /* offline utan cache */ }
+}
+
+function renderLstList() {
+  const list = $('lstList');
+  if (!list) return;
+  const active = new Set(boundaryFeatures().map((f) => f.properties?.['Nr2014']).filter((x) => x !== undefined));
+  list.innerHTML = '';
+  for (const f of lstAreas) {
+    const p = f.properties;
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = p['Nr2014'];
+    cb.checked = active.has(p['Nr2014']);
+    const text = document.createElement('div');
+    text.innerHTML = '<div></div><div class="meta"></div>';
+    text.firstChild.textContent = `${p['Nr2014']} · ${p['Områdesna']}`;
+    text.lastChild.textContent = [p['Upplåtels'], p['Båtfiske'], p['Art'] && `Art: ${p['Art']}`].map((s) => (s || '').trim()).filter(Boolean).join(' · ');
+    label.append(cb, text);
+    list.appendChild(label);
+  }
 }
 
 async function loadInitialBoundary() {
@@ -218,6 +286,8 @@ async function start() {
   follow = true;
   requestWakeLock();
   setZone('unknown', 'Väntar på GPS…', '');
+  const season = closedSeasonWarning();
+  if (season) toast(`⚠️ ${season}`, 6000);
 }
 
 function stop() {
@@ -503,6 +573,15 @@ $('btnPocket').addEventListener('click', enterPocket);
 $('btnSettings').addEventListener('click', () => openSheet('settingsSheet'));
 $('btnBoundary').addEventListener('click', () => openSheet('boundarySheet'));
 $('btnDraw').addEventListener('click', startEdit);
+$('btnUseLst').addEventListener('click', () => {
+  const chosen = new Set(Array.from(document.querySelectorAll('#lstList input:checked')).map((c) => Number(c.value)));
+  const features = lstAreas.filter((f) => chosen.has(f.properties['Nr2014']));
+  if (!features.length) return toast('Välj minst ett område.');
+  setBoundary({ type: 'FeatureCollection', features });
+  map.fitBounds(boundaryLayer.getBounds().pad(0.1));
+  $('boundarySheet').hidden = true;
+  toast('Gränsen uppdaterad.');
+});
 $('editUndo').addEventListener('click', () => { editor.points.pop(); renderEditor(); });
 $('editHere').addEventListener('click', () => {
   if (!lastFix) return toast('Ingen GPS-position ännu – tryck Starta först.');
@@ -525,6 +604,7 @@ $('btnClearTiles').addEventListener('click', async () => {
 
 // ---------- start ----------
 bindSettings();
+loadLstAreas();
 loadInitialBoundary().then(() => {
   if (polygons.length) map.fitBounds(boundaryLayer.getBounds().pad(0.1));
 });

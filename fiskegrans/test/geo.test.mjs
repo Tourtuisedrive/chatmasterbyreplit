@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { toPolygons, locate, zoneFor, tilesForBbox, bbox, padBbox } from '../js/geo.js';
+import { toPolygons, locate, zoneFor, tilesForBbox, bbox, padBbox, isClosedSeason } from '../js/geo.js';
 
 // Testkvadrat ca 1 km x 1 km kring en punkt (inte den verkliga gränsen).
 const LAT0 = 65.58;
@@ -63,4 +63,21 @@ test('tiles täcker bbox', () => {
   const b = padBbox(bbox(polys), 200);
   const t = tilesForBbox(b, 15);
   assert.ok(t.length > 0 && t.length < 50, `${t.length}`);
+});
+
+test('förbudsperiod 5/5–14/6', () => {
+  const t = 'Ej upplåtet 5/5-14/6';
+  assert.equal(isClosedSeason(t, new Date(2026, 4, 4)), false);
+  assert.equal(isClosedSeason(t, new Date(2026, 4, 5)), true);
+  assert.equal(isClosedSeason(t, new Date(2026, 5, 14)), true);
+  assert.equal(isClosedSeason(t, new Date(2026, 5, 15)), false);
+  assert.equal(isClosedSeason('Upplåtet hela året', new Date(2026, 4, 20)), false);
+});
+
+test('Länsstyrelsens område 82 innehåller sjökoordinaten', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const gj = JSON.parse(await readFile(new URL('../data/boundary.geojson', import.meta.url)));
+  const r = locate(65.58488, 16.06088, toPolygons(gj));
+  assert.equal(r.inside, true);
+  assert.ok(r.distance > 150 && r.distance < 300, `${r.distance}`);
 });

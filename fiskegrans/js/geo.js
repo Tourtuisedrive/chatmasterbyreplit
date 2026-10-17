@@ -203,3 +203,16 @@ export function gpxToGeoJSON(text, parser) {
   }
   return { type: 'FeatureCollection', features };
 }
+
+/**
+ * Tolkar Länsstyrelsens upplåtelsetext, t.ex. "Ej upplåtet 5/5-14/6"
+ * (dag/månad), och avgör om datumet ligger inom förbudsperioden.
+ */
+export function isClosedSeason(text, date = new Date()) {
+  const m = /Ej upplåtet\s*(\d+)\/(\d+)\s*-\s*(\d+)\/(\d+)/i.exec(text || '');
+  if (!m) return false;
+  const md = (date.getMonth() + 1) * 100 + date.getDate();
+  const from = Number(m[2]) * 100 + Number(m[1]);
+  const to = Number(m[4]) * 100 + Number(m[3]);
+  return from <= to ? md >= from && md <= to : md >= from || md <= to;
+}

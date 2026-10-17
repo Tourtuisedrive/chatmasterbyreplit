@@ -1,4 +1,133 @@
 {
-  "type": "FeatureCollection",
-  "features": []
+ "type": "FeatureCollection",
+ "source": "Länsstyrelsen Västerbotten, LstAC Område upplåtet för fiske (https://ext-geodata-lokala-visning.lansstyrelsen.se/arcgis/rest/services/LSTAC/LstAC_Fiske_ext/FeatureServer/0)",
+ "features": [
+  {
+   "type": "Feature",
+   "id": 30,
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        16.0671888,
+        65.6221329
+       ],
+       [
+        16.0040778,
+        65.6335269
+       ],
+       [
+        15.9660708,
+        65.6137677
+       ],
+       [
+        15.9929979,
+        65.5977732
+       ],
+       [
+        16.0279806,
+        65.5923227
+       ],
+       [
+        16.0293489,
+        65.6024237
+       ],
+       [
+        16.0257924,
+        65.6075858
+       ],
+       [
+        16.0448712,
+        65.6159964
+       ],
+       [
+        16.0696878,
+        65.6067987
+       ],
+       [
+        16.0521442,
+        65.5980658
+       ],
+       [
+        16.0444084,
+        65.5882576
+       ],
+       [
+        16.0795118,
+        65.5756337
+       ],
+       [
+        16.0935134,
+        65.560469
+       ],
+       [
+        16.1006513,
+        65.5562266
+       ],
+       [
+        16.1425207,
+        65.5711845
+       ],
+       [
+        16.0671888,
+        65.6221329
+       ]
+      ]
+     ],
+     [
+      [
+       [
+        16.1258674,
+        65.5414986
+       ],
+       [
+        16.1254275,
+        65.5426834
+       ],
+       [
+        16.1231964,
+        65.5442575
+       ],
+       [
+        16.1222938,
+        65.5465643
+       ],
+       [
+        16.1133627,
+        65.5434347
+       ],
+       [
+        16.1214277,
+        65.5393554
+       ],
+       [
+        16.1258674,
+        65.5414986
+       ]
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "OBJECTID": 30,
+    "Nr2014": 82,
+    "Art": "Ö, R",
+    "Upplåtels": "Upplåtet hela året",
+    "Områdesna": "Nedre Boksjön del av, Kirjesån mellan Boksjön- Atjeken",
+    "Båtfiske": "Båtfiske",
+    "Tillstånd": "Upplåtet vattenområde",
+    "Nr2014_tex": "82",
+    "Regler": "",
+    "Strl": "",
+    "Baglimit": "",
+    "Övrigt": "",
+    "Kvotering": "",
+    "Areal": "",
+    "Shape__Area": 25020243.77081953,
+    "Shape__Length": 32623.489796310383
+   }
+  }
+ ]
 }
