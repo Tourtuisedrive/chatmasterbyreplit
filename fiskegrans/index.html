@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Fiskegräns</title>
+  <meta name="theme-color" content="#0b1d2a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fiskegräns">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="map"></div>
+  <div id="frame" class="zone-unknown" aria-hidden="true"></div>
+
+  <header id="status">
+    <div id="zoneLabel">Ej startad</div>
+    <div id="zoneDetail">Tryck på Starta för att börja bevaka</div>
+  </header>
+
+  <div id="editBar" hidden>
+    <div class="hint">Tryck på kartan för att lägga till hörnpunkter. Dra punkter för att flytta, tryck på en punkt för att ta bort den, tryck på en liten mittpunkt för att infoga.</div>
+    <div class="row">
+      <button id="editHere">📍 Punkt här</button>
+      <button id="editUndo">↶ Ångra</button>
+      <button id="editCancel">Avbryt</button>
+      <button id="editDone" class="primary">✓ Spara</button>
+    </div>
+  </div>
+
+  <nav id="toolbar">
+    <button id="btnStart" class="primary">▶ Starta</button>
+    <button id="btnCenter" title="Centrera på min position">◎</button>
+    <button id="btnPocket" title="Fickläge">🌙</button>
+    <button id="btnBoundary" title="Gräns">✏️</button>
+    <button id="btnSettings" title="Inställningar">⚙️</button>
+  </nav>
+
+  <!-- Inställningar -->
+  <section id="settingsSheet" class="sheet" hidden>
+    <div class="sheet-head"><h2>Inställningar</h2><button data-close>✕</button></div>
+
+    <h3>Varning nära gränsen</h3>
+    <label>Varningsavstånd: <b><span id="warnDistanceOut"></span> m</b>
+      <input type="range" id="warnDistance" min="10" max="300" step="5">
+    </label>
+    <label class="check"><input type="checkbox" id="useAccuracy"> Räkna med GPS-osäkerheten (varnar tidigare när signalen är dålig)</label>
+    <label class="check"><input type="checkbox" id="nearEnabled"> Ljud när jag närmar mig gränsen</label>
+    <div class="grid">
+      <label>Ljud <select id="nearSound"></select></label>
+      <label>Upprepa var <select id="nearRepeat">
+        <option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option><option value="20">20 s</option>
+      </select></label>
+    </div>
+    <label>Volym <input type="range" id="nearVolume" min="0" max="1" step="0.05"></label>
+    <button data-test="near">🔊 Testa</button>
+
+    <h3>Utanför området</h3>
+    <label class="check"><input type="checkbox" id="outsideEnabled"> Diskret påminnelse när jag är utanför</label>
+    <div class="grid">
+      <label>Ljud <select id="outsideSound"></select></label>
+      <label>Upprepa var <select id="outsideRepeat">
+        <option value="15">15 s</option><option value="30">30 s</option><option value="60">1 min</option><option value="120">2 min</option><option value="300">5 min</option>
+      </select></label>
+    </div>
+    <label>Volym <input type="range" id="outsideVolume" min="0" max="1" step="0.05"></label>
+    <button data-test="outside">🔊 Testa</button>
+
+    <h3>Tillbaka innanför</h3>
+    <label class="check"><input type="checkbox" id="enterEnabled"> Kort ljud när jag kommer in i området igen</label>
+    <div class="grid">
+      <label>Ljud <select id="enterSound"></select></label>
+      <label>Volym <input type="range" id="enterVolume" min="0" max="1" step="0.05"></label>
+    </div>
+    <button data-test="enter">🔊 Testa</button>
+
+    <h3>Karta offline</h3>
+    <label>Kartbakgrund <select id="tileSource"></select></label>
+    <p class="small">Laddar ner kartbilder för området runt gränsen (eller 3 km runt sjön om ingen gräns finns) så att kartan fungerar utan täckning. Gör det hemma på wifi.</p>
+    <button id="btnDownload">⬇ Ladda ner kartan</button>
+    <button id="btnClearTiles">Rensa nedladdad karta</button>
+    <div id="downloadStatus" class="small"></div>
+
+    <h3>Status</h3>
+    <div id="diag" class="small mono"></div>
+  </section>
+
+  <!-- Gräns -->
+  <section id="boundarySheet" class="sheet" hidden>
+    <div class="sheet-head"><h2>Fiskegräns</h2><button data-close>✕</button></div>
+    <p id="boundaryInfo" class="small"></p>
+    <p class="small">Ta gränsen från Länsstyrelsens karta över statens vatten (fjällfiske) för det fiskekort du har. Rita av den här eller importera en fil. Kontrollera alltid mot den officiella kartan – appen är ett hjälpmedel.</p>
+    <button id="btnDraw" class="primary">✏️ Rita / redigera gräns</button>
+    <label class="filebtn">📂 Importera (GeoJSON, KML, GPX)<input type="file" id="fileImport" accept=".geojson,.json,.kml,.gpx,application/json,application/vnd.google-earth.kml+xml,application/gpx+xml"></label>
+    <button id="btnExport">💾 Exportera som GeoJSON</button>
+    <button id="btnDeleteBoundary" class="danger">🗑 Ta bort gräns</button>
+  </section>
+
+  <!-- Fickläge -->
+  <div id="pocket" hidden>
+    <div id="pocketZone">–</div>
+    <div id="pocketDetail"></div>
+    <div id="pocketUnlock">Håll inne här i 2 sekunder för att låsa upp</div>
+  </div>
+
+  <div id="toast" hidden></div>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
