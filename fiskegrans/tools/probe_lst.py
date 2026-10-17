@@ -21,6 +21,19 @@ def get_json(url, params=None):
 
 
 cfg = get_json(CONFIG)
+raw = json.dumps(cfg, ensure_ascii=False)
+for m in sorted(set(re.findall(r'"(?:itemId|layerId|serviceUrl|url|layerUrl|id)"\s*:\s*"([^"]{6,})"', raw))):
+    print("CFG-REF:", m)
+for k, w in cfg.get("widgets", {}).items():
+    print("WIDGET:", k, w.get("uri"), json.dumps(w.get("config"), ensure_ascii=False)[:1500])
+PORTAL = "https://ext-geoportal.lansstyrelsen.se/arcgis"
+for q in ["fiske statens vatten", "fiske", "statens vatten", "LstAC fiske"]:
+    try:
+        r = get_json(f"{PORTAL}/sharing/rest/search", {"q": q, "num": 30, "f": "json"})
+        for it in r.get("results", []):
+            print("SEARCH:", q, "|", it.get("id"), "|", it.get("type"), "|", it.get("title"), "|", it.get("url"))
+    except Exception as e:  # noqa: BLE001
+        print("search fail", q, e)
 ds = cfg.get("dataSources", {})
 print("DATASOURCES:")
 for k, v in ds.items():
