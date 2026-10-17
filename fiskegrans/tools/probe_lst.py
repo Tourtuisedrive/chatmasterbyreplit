@@ -49,6 +49,11 @@ for k, v in ds.items():
                 layers.append((t, lyr["url"]))
             walk(lyr.get("layers"), t + " / ")
 
+    print("ITEM DATA:", json.dumps(data, ensure_ascii=False)[:6000])
+    try:
+        print("ITEM INFO:", json.dumps(get_json(f"{portal}/sharing/rest/content/items/{item}", {"f": "json"}), ensure_ascii=False)[:1500])
+    except Exception as e:  # noqa: BLE001
+        print("info fail", e)
     walk(data.get("operationalLayers"))
 
 # Expandera map-/feature-tjänster utan lagerindex till deras lager.
