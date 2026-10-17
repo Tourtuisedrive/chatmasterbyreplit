@@ -1,0 +1,21 @@
+name: Hämta fiskegräns från Länsstyrelsen
+
+on:
+  push:
+    branches: [claude/fishing-boundary-alert-app-grz168]
+    paths: ['fiskegrans/tools/fetch_lst_boundary.py', '.github/workflows/fetch-boundary.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 fiskegrans/tools/fetch_lst_boundary.py lst-boundary.geojson
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lst-boundary
+          path: lst-boundary.geojson
